@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAKE NEWS DETECTOR</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Scanlines effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(255, 0, 0, 0.03),
+                rgba(255, 0, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 5em;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #ff0000;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.4);
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.4); }
+            50% { text-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 0 60px rgba(255, 0, 0, 0.6); }
+        }
+
+        .header p {
+            font-size: 1.4em;
+            color: #888;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .divider {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff0000, transparent);
+            margin: 40px 0;
+        }
+
+        .main-card {
+            background: #111111;
+            border: 3px solid #ff0000;
+            padding: 50px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5), inset 0 0 30px rgba(255, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            background: #ff0000;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 15px;
+            color: #ff0000;
+            font-size: 1.3em;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #ff0000;
+            background: #0a0a0a;
+            color: #ffffff;
+            font-size: 1.1em;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 180px;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #ff3333;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.7), inset 0 0 10px rgba(255, 0, 0, 0.1);
+            background: #1a0a0a;
+        }
+
+        textarea::placeholder {
+            color: #555;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 18px 30px;
+            border: 3px solid #ff0000;
+            background: #000000;
+            color: #ff0000;
+            font-size: 1.2em;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: #ff0000;
+            z-index: -1;
+            transition: left 0.1s ease;
+        }
+
+        .btn-analyze:hover {
+            background: #ff0000;
+            color: #000000;
+            box-shadow: 0 0 40px rgba(255, 0, 0, 1);
+            transform: translate(2px, 2px);
+        }
+
+        .btn-clear {
+            background: #000000;
+        }
+
+        .btn-clear:hover {
+            background: #1a1a1a;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+        }
+
+        button:active {
+            transform: translate(0, 0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #333;
+            border-top: 4px solid #ff0000;
+            border-right: 4px solid #ff0000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: #ff0000;
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .result-card {
+            display: none;
+            background: #111111;
+            border: 3px solid #ff0000;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .result-card.show {
+            display: block;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prediction-badge {
+            display: inline-block;
+            padding: 15px 40px;
+            font-size: 1.8em;
+            font-weight: 900;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 3px solid;
+            box-shadow: 0 0 20px;
+        }
+
+        .badge-real {
+            background: #1a4d7a;
+            color: #00ccff;
+            border-color: #00ccff;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.6);
+        }
+
+        .badge-fake {
+            background: #7a1a1a;
+            color: #ff0000;
+            border-color: #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+        }
+
+        .confidence-section {
+            margin: 40px 0;
+        }
+
+        .confidence-label {
+            color: #ff0000;
+            margin-bottom: 12px;
+            font-weight: 900;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 30px;
+            background: #1a1a1a;
+            border: 2px solid #ff0000;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6666);
+            width: 0%;
+            animation: fillBar 1s ease-out forwards;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000000;
+            font-size: 1em;
+            font-weight: 900;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+        }
+
+        @keyframes fillBar {
+            from { width: 0%; }
+            to { width: var(--width); }
+        }
+
+        .result-text {
+            background: #0a0a0a;
+            padding: 25px;
+            border-left: 5px solid #ff0000;
+            color: #ffffff;
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin: 30px 0;
+            box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.1);
+            font-weight: 600;
+        }
+
+        .result-text strong {
+            color: #ff0000;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .stat-box {
+            background: #0a0a0a;
+            padding: 30px;
+            border: 2px solid #ff0000;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.05);
+            transition: left 0.3s ease;
+        }
+
+        .stat-box:hover::before {
+            left: 100%;
+        }
+
+        .stat-value {
+            font-size: 3em;
+            font-weight: 900;
+            color: #ff0000;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            color: #888;
+            margin-top: 10px;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+
+        .error-message {
+            display: none;
+            background: #7a1a1a;
+            border: 3px solid #ff0000;
+            color: #ff6666;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            font-weight: bold;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 3.5em;
+            }
+
+            .main-card {
+                padding: 30px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>FAKE NEWS DETECTOR</h1>
+            <p>AI-POWERED MISINFORMATION DETECTION</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="main-card">
+            <div class="input-group">
+                <label>PASTE NEWS ARTICLE</label>
+                <textarea 
+                    id="newsInput" 
+                    placeholder="PASTE YOUR NEWS HERE... SYSTEM WILL ANALYZE INSTANTLY"
+                ></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-analyze" onclick="analyzeNews()">ANALYZE NOW</button>
+                <button class="btn-clear" onclick="clearForm()">CLEAR</button>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>ANALYZING...</p>
+            </div>
+
+            <div class="result-card" id="resultCard">
+                <div id="resultBadge"></div>
+
+                <div class="confidence-section">
+                    <div class="confidence-label">
+                        <span>CONFIDENCE LEVEL</span>
+                        <span id="confidencePercent">0%</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceFill" style="--width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="result-text" id="resultText"></div>
+
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="realProb">0%</div>
+                        <div class="stat-label">REAL PROBABILITY</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="fakeProb">0%</div>
+                        <div class="stat-label">FAKE PROBABILITY</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/predict';
+
+        async function analyzeNews() {
+            const text = document.getElementById('newsInput').value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+            const resultCard = document.getElementById('resultCard');
+
+            errorMessage.classList.remove('show');
+            errorMessage.textContent = '';
+
+            if (!text) {
+                errorMessage.textContent = '⚠ PLEASE PASTE A NEWS ARTICLE';
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            if (text.length < 20) {
+                errorMessage.textContent = '⚠ TEXT TOO SHORT (MIN 20 CHARACTERS)';
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            loading.style.display = 'block';
+            resultCard.classList.remove('show');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+
+                if (!response.ok) throw new Error('API ERROR');
+
+                const data = await response.json();
+                displayResult(data);
+            } catch (error) {
+                errorMessage.textContent = '❌ ERROR: API NOT RESPONDING. START SERVER ON LOCALHOST:5000';
+                errorMessage.classList.add('show');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayResult(data) {
+            const resultBadge = document.getElementById('resultBadge');
+            const confidenceFill = document.getElementById('confidenceFill');
+            const confidencePercent = document.getElementById('confidencePercent');
+            const resultText = document.getElementById('resultText');
+            const realProb = document.getElementById('realProb');
+            const fakeProb = document.getElementById('fakeProb');
+            const resultCard = document.getElementById('resultCard');
+
+            const isFake = data.prediction === 'FAKE';
+            const confidence = Math.round(data.confidence);
+
+            resultBadge.className = 'prediction-badge ' + (isFake ? 'badge-fake' : 'badge-real');
+            resultBadge.textContent = (isFake ? '🚨 FAKE NEWS' : '✅ REAL NEWS');
+
+            confidenceFill.style.setProperty('--width', confidence + '%');
+            confidencePercent.textContent = confidence + '%';
+
+            resultText.innerHTML = isFake 
+                ? '⚠ <strong>FAKE NEWS DETECTED</strong> - This article is likely misinformation. Do not share.'
+                : '✓ <strong>REAL NEWS CONFIRMED</strong> - This article appears to be legitimate news.';
+
+            realProb.textContent = Math.round(data.real_probability) + '%';
+            fakeProb.textContent = Math.round(data.fake_probability) + '%';
+
+            resultCard.classList.add('show');
+        }
+
+        function clearForm() {
+            document.getElementById('newsInput').value = '';
+            document.getElementById('resultCard').classList.remove('show');
+            document.getElementById('newsInput').focus();
+        }
+
+        document.getElementById('newsInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') analyzeNews();
+        });
+    </script>
+</body>
+</html>
