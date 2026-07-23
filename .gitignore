@@ -10,9 +10,7 @@ env/
 *.csv
 fake-and-real-news-dataset.zip
 
-# Model files (we'll handle separately)
-*.pkl
-*.joblib
+
 
 # IDE
 .vscode/
