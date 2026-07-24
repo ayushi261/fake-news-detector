@@ -5,6 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import pickle
 import numpy as np
+from sklearn.naive_bayes import MultinomialNB
 
 print("=" * 60)
 print("FAKE NEWS DETECTOR - MODEL TRAINING")
@@ -37,7 +38,8 @@ print(f"   Features created: {X_train_vec.shape[1]}")
 
 # Step 4: Train Logistic Regression model
 print("\n4. Training Logistic Regression model...")
-model = LogisticRegression(max_iter=1000, random_state=42)
+from sklearn.naive_bayes import MultinomialNB
+model = MultinomialNB()
 model.fit(X_train_vec, y_train)
 print("   Model training complete!")
 
