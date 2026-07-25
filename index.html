@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAKE NEWS DETECTOR</title>
+    <title>VerifyX - AI-Powered Fake News Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400&family=Space+Mono:wght@700&family=Oswald:wght@700;900&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,211 +13,535 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: #000000;
-            color: #ffffff;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #fafafa;
+            color: #000;
+            line-height: 1.6;
         }
 
-        /* Scanlines effect */
-        body::before {
-            content: '';
-            position: fixed;
+        header {
+            background: #fff;
+            padding: 30px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #000;
+            position: sticky;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(255, 0, 0, 0.03),
-                rgba(255, 0, 0, 0.03) 1px,
-                transparent 1px,
-                transparent 2px
-            );
-            pointer-events: none;
-            z-index: 1;
+            z-index: 100;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 60px 30px;
-            position: relative;
-            z-index: 2;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
         }
 
-        .header {
-            text-align: center;
+        .logo-icon {
+            background: #ff0000;
+            color: white;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0;
+            font-weight: 900;
+            font-size: 32px;
+            font-family: 'Oswald', sans-serif;
+        }
+
+        nav {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #000;
+            font-weight: 900;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        nav a:hover {
+            color: #ff0000;
+        }
+
+        .cta-button {
+            background: #000;
+            color: white;
+            padding: 14px 28px;
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .hero {
+            background: #fafafa;
+            padding: 100px 60px;
+            text-align: left;
+        }
+
+        .hero-meta {
+            font-size: 11px;
+            color: #000;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .hero-meta .red {
+            color: #ff0000;
+        }
+
+        .hero h1 {
+            font-size: 120px;
+            font-weight: 900;
+            line-height: 0.85;
             margin-bottom: 60px;
+            max-width: 1000px;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: -3px;
         }
 
-        .header h1 {
-            font-size: 5em;
+        .hero h1 .red-word {
+            color: #ff0000;
+            display: block;
+        }
+
+        .top-banner {
+            background: #ff0000;
+            color: white;
+            padding: 18px 60px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .top-banner span {
+            margin: 0 20px;
+        }
+
+        .divider-line {
+            height: 2px;
+            background: #000;
+            margin: 0;
+        }
+
+        .stats {
+            background: #fff;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            border: 2px solid #000;
+            border-top: none;
+            margin: 80px 60px;
+        }
+
+        .stat-box {
+            padding: 50px 30px;
+            text-align: center;
+            border-right: 2px solid #000;
+        }
+
+        .stat-box:last-child {
+            border-right: none;
+        }
+
+        .stat-number {
+            font-size: 64px;
+            font-weight: 900;
+            color: #000;
+            margin-bottom: 15px;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .stat-number.red {
+            color: #ff0000;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #000;
+        }
+
+        .manifesto {
+            background: #fff;
+            padding: 80px 60px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .manifesto h2 {
+            font-size: 11px;
             font-weight: 900;
             letter-spacing: 3px;
-            color: #ff0000;
             text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.4);
-            margin-bottom: 15px;
-            animation: pulse 2s infinite;
+            color: #ff0000;
+            margin-bottom: 20px;
         }
 
-        @keyframes pulse {
-            0%, 100% { text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.4); }
-            50% { text-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 0 60px rgba(255, 0, 0, 0.6); }
+        .manifesto h3 {
+            font-size: 80px;
+            font-weight: 900;
+            line-height: 0.9;
+            margin-bottom: 40px;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: -2px;
         }
 
-        .header p {
-            font-size: 1.4em;
-            color: #888;
-            font-weight: 300;
+        .manifesto h3 .red-word {
+            color: #ff0000;
+        }
+
+        .manifesto p {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.8;
+            font-weight: 500;
+        }
+
+        .manifesto-image {
+            width: 100%;
+            height: 450px;
+            background: url("pic.jpg") center center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            border: 2px solid #000;
+        }
+
+        .process {
+            background: #000;
+            color: white;
+            padding: 80px 60px;
+        }
+
+        .process h2 {
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #ff0000;
+            margin-bottom: 30px;
+        }
+
+        .process h3 {
+            font-size: 80px;
+            font-weight: 900;
+            line-height: 0.9;
+            margin-bottom: 60px;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: -2px;
+        }
+
+        .process h3 .red-word {
+            color: #ff0000;
+        }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .process-box {
+            border: 2px solid #fff;
+            padding: 50px 40px;
+        }
+
+        .process-icon {
+            background: #ff0000;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 25px;
+        }
+
+        .process-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2.5;
+        }
+
+        .process-num {
+            font-size: 48px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 25px;
+            font-family: 'Oswald', sans-serif;
             letter-spacing: 2px;
         }
 
-        .divider {
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #ff0000, transparent);
-            margin: 40px 0;
-        }
-
-        .main-card {
-            background: #111111;
-            border: 3px solid #ff0000;
-            padding: 50px;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5), inset 0 0 30px rgba(255, 0, 0, 0.1);
-            position: relative;
-        }
-
-        .main-card::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            left: -8px;
-            right: -8px;
-            bottom: -8px;
-            background: #ff0000;
-            z-index: -1;
-            opacity: 0.1;
-        }
-
-        .input-group {
-            margin-bottom: 30px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 15px;
-            color: #ff0000;
-            font-size: 1.3em;
+        .process-title {
+            font-size: 18px;
             font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-family: 'Oswald', sans-serif;
             letter-spacing: 1px;
+        }
+
+        .process-text {
+            font-size: 15px;
+            color: #ddd;
+            line-height: 1.7;
+            font-weight: 500;
+        }
+
+        .detector-section {
+            background: #fff;
+            padding: 80px 60px;
+        }
+
+        .detector-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #000;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 25px;
+            background: #f5f5f5;
+            border: 2px solid #000;
+            border-bottom: none;
+            text-align: center;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: 12px;
+            letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        textarea {
-            width: 100%;
-            padding: 20px;
-            border: 2px solid #ff0000;
-            background: #0a0a0a;
-            color: #ffffff;
-            font-size: 1.1em;
-            font-family: 'Courier New', monospace;
-            resize: vertical;
-            min-height: 180px;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+        .tab.active {
+            background: #000;
+            color: white;
         }
 
-        textarea:focus {
-            outline: none;
-            border-color: #ff3333;
-            box-shadow: 0 0 25px rgba(255, 0, 0, 0.7), inset 0 0 10px rgba(255, 0, 0, 0.1);
-            background: #1a0a0a;
+        .tab-content {
+            display: none;
         }
 
-        textarea::placeholder {
-            color: #555;
+        .tab-content.active {
+            display: block;
         }
 
-        .button-group {
-            display: flex;
-            gap: 20px;
+        .input-area {
             margin-bottom: 30px;
         }
 
-        button {
-            flex: 1;
-            padding: 18px 30px;
-            border: 3px solid #ff0000;
-            background: #000000;
-            color: #ff0000;
-            font-size: 1.2em;
+        textarea, input {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #000;
+            font-family: inherit;
+            font-size: 14px;
+            background: white;
+            color: #000;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        textarea {
+            min-height: 220px;
+            resize: vertical;
+        }
+
+        textarea::placeholder, input::placeholder {
+            color: #bbb;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .analyze-button {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 13px;
             font-weight: 900;
             letter-spacing: 2px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.1s ease;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-family: 'Oswald', sans-serif;
         }
 
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
+        .analyze-button:hover {
+            background: #cc0000;
+        }
+
+        .result {
+            display: none;
+            background: #fff;
+            padding: 60px;
+            margin-top: 50px;
+            border: 2px solid #000;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result-badge {
+            display: inline-block;
+            padding: 18px 35px;
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 40px;
+            border: 3px solid;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .badge-real {
+            background: #e3f2fd;
+            border-color: #00ccff;
+            color: #00ccff;
+        }
+
+        .badge-fake {
+            background: #ffebee;
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        .confidence-section {
+            margin: 50px 0;
+        }
+
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-weight: 900;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .confidence-bar {
             width: 100%;
+            height: 45px;
+            background: #f5f5f5;
+            border: 2px solid #000;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .confidence-fill {
             height: 100%;
             background: #ff0000;
-            z-index: -1;
-            transition: left 0.1s ease;
+            width: 0%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 13px;
         }
 
-        .btn-analyze:hover {
-            background: #ff0000;
-            color: #000000;
-            box-shadow: 0 0 40px rgba(255, 0, 0, 1);
-            transform: translate(2px, 2px);
+        .result-text {
+            background: #f5f5f5;
+            padding: 25px;
+            border-left: 5px solid #ff0000;
+            margin: 40px 0;
+            font-size: 16px;
+            line-height: 1.9;
+            font-weight: 600;
         }
 
-        .btn-clear {
-            background: #000000;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 40px;
         }
 
-        .btn-clear:hover {
-            background: #1a1a1a;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+        .stat-card {
+            background: #f5f5f5;
+            padding: 40px;
+            border: 2px solid #000;
+            text-align: center;
         }
 
-        button:active {
-            transform: translate(0, 0);
+        .stat-card-value {
+            font-size: 60px;
+            font-weight: 900;
+            color: #ff0000;
+            margin-bottom: 15px;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 1px;
         }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            box-shadow: none;
+        .stat-card-label {
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #000;
+        }
+
+        footer {
+            background: #000;
+            color: white;
+            padding: 50px 60px;
+            text-align: center;
+            font-size: 11px;
+            letter-spacing: 2px;
+            font-weight: 700;
         }
 
         .loading {
             display: none;
             text-align: center;
-            margin: 40px 0;
+            padding: 50px;
         }
 
         .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #333;
+            border: 4px solid #f5f5f5;
             border-top: 4px solid #ff0000;
-            border-right: 4px solid #ff0000;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
         }
 
         @keyframes spin {
@@ -224,301 +549,216 @@
             100% { transform: rotate(360deg); }
         }
 
-        .loading p {
-            color: #ff0000;
-            margin-top: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .result-card {
-            display: none;
-            background: #111111;
-            border: 3px solid #ff0000;
-            padding: 40px;
-            margin-top: 30px;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
-            position: relative;
-        }
-
-        .result-card.show {
-            display: block;
-            animation: slideIn 0.4s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .prediction-badge {
-            display: inline-block;
-            padding: 15px 40px;
-            font-size: 1.8em;
-            font-weight: 900;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border: 3px solid;
-            box-shadow: 0 0 20px;
-        }
-
-        .badge-real {
-            background: #1a4d7a;
-            color: #00ccff;
-            border-color: #00ccff;
-            box-shadow: 0 0 20px rgba(0, 204, 255, 0.6);
-        }
-
-        .badge-fake {
-            background: #7a1a1a;
-            color: #ff0000;
-            border-color: #ff0000;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
-        }
-
-        .confidence-section {
-            margin: 40px 0;
-        }
-
-        .confidence-label {
-            color: #ff0000;
-            margin-bottom: 12px;
-            font-weight: 900;
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.1em;
-            letter-spacing: 1px;
-        }
-
-        .confidence-bar {
-            width: 100%;
-            height: 30px;
-            background: #1a1a1a;
-            border: 2px solid #ff0000;
-            overflow: hidden;
-            margin-bottom: 30px;
-            box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.2);
-            position: relative;
-        }
-
-        .confidence-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff0000, #ff6666);
-            width: 0%;
-            animation: fillBar 1s ease-out forwards;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000000;
-            font-size: 1em;
-            font-weight: 900;
-            letter-spacing: 1px;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
-        }
-
-        @keyframes fillBar {
-            from { width: 0%; }
-            to { width: var(--width); }
-        }
-
-        .result-text {
-            background: #0a0a0a;
-            padding: 25px;
-            border-left: 5px solid #ff0000;
-            color: #ffffff;
-            font-size: 1.1em;
-            line-height: 1.8;
-            margin: 30px 0;
-            box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.1);
-            font-weight: 600;
-        }
-
-        .result-text strong {
-            color: #ff0000;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .stat-box {
-            background: #0a0a0a;
-            padding: 30px;
-            border: 2px solid #ff0000;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-box::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 0, 0, 0.05);
-            transition: left 0.3s ease;
-        }
-
-        .stat-box:hover::before {
-            left: 100%;
-        }
-
-        .stat-value {
-            font-size: 3em;
-            font-weight: 900;
-            color: #ff0000;
-            text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-            position: relative;
-            z-index: 1;
-        }
-
-        .stat-label {
-            color: #888;
-            margin-top: 10px;
-            font-size: 1.1em;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-weight: bold;
-            position: relative;
-            z-index: 1;
-        }
-
-        .error-message {
-            display: none;
-            background: #7a1a1a;
-            border: 3px solid #ff0000;
-            color: #ff6666;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-            font-weight: bold;
-            font-size: 1.1em;
-            letter-spacing: 1px;
-        }
-
-        .error-message.show {
-            display: block;
-            animation: slideIn 0.3s ease-out;
-        }
-
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 3.5em;
-            }
-
-            .main-card {
-                padding: 30px;
-            }
-
-            .button-group {
+            header {
                 flex-direction: column;
+                gap: 25px;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 15px;
+                width: 100%;
+            }
+
+            .hero h1 {
+                font-size: 60px;
             }
 
             .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .manifesto {
+                grid-template-columns: 1fr;
+            }
+
+            .process-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>FAKE NEWS DETECTOR</h1>
-            <p>AI-POWERED MISINFORMATION DETECTION</p>
+    <div class="top-banner">
+        FAKE NEWS SPREADS 6X FASTER THAN TRUTH <span>●</span> VERIFY BEFORE YOU SHARE <span>●</span> AI-POWERED CREDIBILITY SCORING
+    </div>
+
+    <header>
+        <div class="logo">
+            <div class="logo-icon">V</div>
+            <div>VERIFYX</div>
         </div>
+        <nav>
+            <a href="#detector">DETECTOR</a>
+            <a href="#manifesto">MANIFESTO</a>
+            <a href="#process">HOW IT WORKS</a>
+            <a href="#detector" class="cta-button">RUN A CHECK</a>
+        </nav>
+    </header>
 
-        <div class="divider"></div>
+    <div class="divider-line"></div>
 
-        <div class="main-card">
-            <div class="input-group">
-                <label>PASTE NEWS ARTICLE</label>
-                <textarea 
-                    id="newsInput" 
-                    placeholder="PASTE YOUR NEWS HERE... SYSTEM WILL ANALYZE INSTANTLY"
-                ></textarea>
-            </div>
+    <section class="hero">
+        <div class="hero-meta">EST. 2025 / TRUTH DEPT. <span class="red">LIVE</span></div>
+        <h1>SPOT THE<span class="red-word">LIE</span>BEFORE IT<span class="red-word">SPREADS</span></h1>
+    </section>
 
-            <div class="button-group">
-                <button class="btn-analyze" onclick="analyzeNews()">ANALYZE NOW</button>
-                <button class="btn-clear" onclick="clearForm()">CLEAR</button>
-            </div>
-
-            <div class="error-message" id="errorMessage"></div>
-
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>ANALYZING...</p>
-            </div>
-
-            <div class="result-card" id="resultCard">
-                <div id="resultBadge"></div>
-
-                <div class="confidence-section">
-                    <div class="confidence-label">
-                        <span>CONFIDENCE LEVEL</span>
-                        <span id="confidencePercent">0%</span>
-                    </div>
-                    <div class="confidence-bar">
-                        <div class="confidence-fill" id="confidenceFill" style="--width: 0%"></div>
-                    </div>
-                </div>
-
-                <div class="result-text" id="resultText"></div>
-
-                <div class="stats">
-                    <div class="stat-box">
-                        <div class="stat-value" id="realProb">0%</div>
-                        <div class="stat-label">REAL PROBABILITY</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="fakeProb">0%</div>
-                        <div class="stat-label">FAKE PROBABILITY</div>
-                    </div>
-                </div>
-            </div>
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-number">3</div>
+            <div class="stat-label">Checks Run</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number red">2</div>
+            <div class="stat-label">Fakes Caught</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Misleading</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">1</div>
+            <div class="stat-label">Verified Real</div>
         </div>
     </div>
+
+    <section class="manifesto" id="manifesto">
+        <div>
+            <h2>02 THE MANIFESTO</h2>
+            <h3>WHY THIS<span class="red-word">MATTERS</span></h3>
+            <p>Falsehoods spread roughly six times quicker than facts online. By the time a correction arrives, the damage is done. VerifyX exists to interrupt that head start.</p>
+            <p>Manipulative headlines are engineered to bypass reason and hijack emotion. We surface the linguistic tricks so you see the machinery.</p>
+            <p>Every check returns a decisive call—real or fabricated—backed by a credibility score and transparent red flags.</p>
+        </div>
+        <div class="manifesto-image"></div>
+    </section>
+
+    <section class="process" id="process">
+        <h2>03 THE PROCESS</h2>
+        <h3>THREE STEPS TO<span class="red-word">THE TRUTH</span></h3>
+        <div class="process-grid">
+            <div class="process-box">
+                <div class="process-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                        <polyline points="13 2 13 9 20 9"/>
+                    </svg>
+                </div>
+                <div class="process-num">01</div>
+                <div class="process-title">DROP IT IN</div>
+                <div class="process-text">Paste raw article text or link. Headlines, tweets, full stories.</div>
+            </div>
+            <div class="process-box">
+                <div class="process-icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div class="process-num">02</div>
+                <div class="process-title">AI DISSECTS IT</div>
+                <div class="process-text">Engine reads for manipulation, false sources, fabricated stats.</div>
+            </div>
+            <div class="process-box">
+                <div class="process-icon">
+                    <svg viewBox="0 0 24 24">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+                <div class="process-num">03</div>
+                <div class="process-title">GET THE VERDICT</div>
+                <div class="process-text">Decisive call with credibility score and red flag breakdown.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="detector-section" id="detector">
+        <div class="detector-tabs">
+            <div class="tab active" onclick="switchTab('text')">PASTE TEXT</div>
+            <div class="tab" onclick="switchTab('url')">PASTE URL</div>
+        </div>
+
+        <div id="text-tab" class="tab-content active">
+            <div class="input-area">
+                <textarea id="newsText" placeholder="Paste the news article, headline, or claim here..."></textarea>
+                <div class="char-count"><span id="charCount">0</span> CHARS</div>
+                <button class="analyze-button" onclick="analyzeNews()">ANALYZE ↓</button>
+            </div>
+        </div>
+
+        <div id="url-tab" class="tab-content">
+            <div class="input-area">
+                <input type="url" id="newsUrl" placeholder="https://example.com/breaking-story">
+                <div class="char-count">PUBLIC ARTICLES ONLY</div>
+                <button class="analyze-button" onclick="analyzeNews()">ANALYZE ↓</button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Analyzing...</p>
+        </div>
+
+        <div id="result" class="result">
+            <div id="resultBadge"></div>
+            <div class="confidence-section">
+                <div class="confidence-label">
+                    <span>CONFIDENCE LEVEL</span>
+                    <span id="confidencePercent">0%</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
+                </div>
+            </div>
+            <div id="resultText" class="result-text"></div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-value" id="realProb">0%</div>
+                    <div class="stat-card-label">REAL PROBABILITY</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value" id="fakeProb">0%</div>
+                    <div class="stat-card-label">FAKE PROBABILITY</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        © 2025 VERIFYX TRUTH DEPT AI VERDICTS ARE GUIDANCE NOT GOSPEL ALWAYS VERIFY SOURCES
+    </footer>
 
     <script>
         const API_URL = 'http://localhost:5000/predict';
 
-        async function analyzeNews() {
-            const text = document.getElementById('newsInput').value.trim();
-            const errorMessage = document.getElementById('errorMessage');
-            const loading = document.getElementById('loading');
-            const resultCard = document.getElementById('resultCard');
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
 
-            errorMessage.classList.remove('show');
-            errorMessage.textContent = '';
+        document.getElementById('newsText').addEventListener('input', function() {
+            document.getElementById('charCount').textContent = this.value.length;
+        });
+
+        async function analyzeNews() {
+            const textInput = document.getElementById('newsText').value.trim();
+            const urlInput = document.getElementById('newsUrl').value.trim();
+            const text = textInput || urlInput;
 
             if (!text) {
-                errorMessage.textContent = '⚠ PLEASE PASTE A NEWS ARTICLE';
-                errorMessage.classList.add('show');
+                alert('Please paste a news article or URL');
                 return;
             }
 
-            if (text.length < 20) {
-                errorMessage.textContent = '⚠ TEXT TOO SHORT (MIN 20 CHARACTERS)';
-                errorMessage.classList.add('show');
-                return;
-            }
-
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
             loading.style.display = 'block';
-            resultCard.classList.remove('show');
+            result.classList.remove('show');
 
             try {
                 const response = await fetch(API_URL, {
@@ -527,55 +767,38 @@
                     body: JSON.stringify({ text: text })
                 });
 
-                if (!response.ok) throw new Error('API ERROR');
+                if (!response.ok) throw new Error('API error');
 
                 const data = await response.json();
                 displayResult(data);
             } catch (error) {
-                errorMessage.textContent = '❌ ERROR: API NOT RESPONDING. START SERVER ON LOCALHOST:5000';
-                errorMessage.classList.add('show');
+                alert('Error: Could not connect to API. Make sure it is running on http://localhost:5000');
             } finally {
                 loading.style.display = 'none';
             }
         }
 
         function displayResult(data) {
-            const resultBadge = document.getElementById('resultBadge');
-            const confidenceFill = document.getElementById('confidenceFill');
-            const confidencePercent = document.getElementById('confidencePercent');
-            const resultText = document.getElementById('resultText');
-            const realProb = document.getElementById('realProb');
-            const fakeProb = document.getElementById('fakeProb');
-            const resultCard = document.getElementById('resultCard');
-
+            const result = document.getElementById('result');
             const isFake = data.prediction === 'FAKE';
             const confidence = Math.round(data.confidence);
 
-            resultBadge.className = 'prediction-badge ' + (isFake ? 'badge-fake' : 'badge-real');
-            resultBadge.textContent = (isFake ? '🚨 FAKE NEWS' : '✅ REAL NEWS');
+            document.getElementById('resultBadge').className = 'result-badge ' + (isFake ? 'badge-fake' : 'badge-real');
+            document.getElementById('resultBadge').textContent = (isFake ? 'FAKE NEWS' : 'REAL NEWS');
 
-            confidenceFill.style.setProperty('--width', confidence + '%');
-            confidencePercent.textContent = confidence + '%';
+            document.getElementById('confidenceFill').style.width = confidence + '%';
+            document.getElementById('confidencePercent').textContent = confidence + '%';
 
-            resultText.innerHTML = isFake 
-                ? '⚠ <strong>FAKE NEWS DETECTED</strong> - This article is likely misinformation. Do not share.'
-                : '✓ <strong>REAL NEWS CONFIRMED</strong> - This article appears to be legitimate news.';
+            document.getElementById('resultText').innerHTML = isFake 
+                ? 'This article appears to be FAKE NEWS. Be cautious before sharing.'
+                : 'This article appears to be REAL NEWS. Credibility score is high.';
 
-            realProb.textContent = Math.round(data.real_probability) + '%';
-            fakeProb.textContent = Math.round(data.fake_probability) + '%';
+            document.getElementById('realProb').textContent = Math.round(data.real_probability) + '%';
+            document.getElementById('fakeProb').textContent = Math.round(data.fake_probability) + '%';
 
-            resultCard.classList.add('show');
+            result.classList.add('show');
+            result.scrollIntoView({ behavior: 'smooth' });
         }
-
-        function clearForm() {
-            document.getElementById('newsInput').value = '';
-            document.getElementById('resultCard').classList.remove('show');
-            document.getElementById('newsInput').focus();
-        }
-
-        document.getElementById('newsInput').addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') analyzeNews();
-        });
     </script>
 </body>
 </html>
