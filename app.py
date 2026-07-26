@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import pickle
 import re
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -26,17 +27,10 @@ def clean_text(text):
     return text
 
 # Home route
-@app.route('/', methods=['GET'])
+@app.route("/")
 def home():
-    return jsonify({
-        'message': 'Fake News Detector API',
-        'version': '1.0',
-        'endpoint': '/predict',
-        'method': 'POST',
-        'example': {
-            'text': 'Your news article text here'
-        }
-    })
+    return render_template("index.html")
+    
 
 # Prediction route
 @app.route('/predict', methods=['POST'])
@@ -90,5 +84,7 @@ if __name__ == '__main__':
     print("API running on: http://localhost:5000")
     print("Endpoint: POST http://localhost:5000/predict")
     print("="*60 + "\n")
-    app.run(debug=True, host='0.0.0.0', port=5000)
-    
+    app.run(
+    host="0.0.0.0",
+    port=int(os.environ.get("PORT", 5000))
+)
