@@ -1,37 +1,10 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pickle
 import re
 import os
 import requests
 
-DEFAULT_SEARCH_ENGINE_ID = "8505974bd0e0d4ac0"
-def search_google(query, api_key, search_engine_id=None):
-    search_engine_id = search_engine_id or DEFAULT_SEARCH_ENGINE_ID
-    try:
-        url = "https://www.googleapis.com/customsearch/v1"
-        params = {
-            'key': api_key,
-            'cx': search_engine_id,
-            'q': query,
-            'num': 3
-        }
-        response = requests.get(url, params=params)
-        data = response.json()
-        
-        if 'items' in data:
-            results = []
-            for item in data['items'][:3]:
-                results.append({
-                    'title': item.get('title', ''),
-                    'link': item.get('link', ''),
-                    'snippet': item.get('snippet', '')
-                })
-            return results
-        return []
-    except Exception as e:
-        print(f"Search error: {e}")
-        return []
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -44,7 +17,7 @@ with open('fake_news_model.pkl', 'rb') as f:
 with open('tfidf_vectorizer.pkl', 'rb') as f:
     vectorizer = pickle.load(f)
 
-print("✓ Model loaded successfully!")
+print("Model loaded successfully!")
 
 # Function to clean text (same as training)
 def clean_text(text):
@@ -54,11 +27,51 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
+# Gemini-based fact-check function
+def check_with_gemini(text, api_key):
+    """Ask Gemini to fact-check the claim"""
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+
+        prompt = f"""You are a fact-checking assistant. Evaluate this claim or article excerpt for factual accuracy based on your knowledge:
+
+"{text[:500]}"
+
+Respond in this exact format:
+VERDICT: [TRUE / FALSE / UNVERIFIABLE / PARTIALLY TRUE]
+EXPLANATION: [2-3 sentence explanation of your reasoning]"""
+
+        payload = {
+            "contents": [{
+                "parts": [{"text": prompt}]
+            }]
+        }
+
+        response = requests.post(url, json=payload, timeout=15)
+        data = response.json()
+
+        if 'candidates' in data and len(data['candidates']) > 0:
+            output_text = data['candidates'][0]['content']['parts'][0]['text']
+            return {'success': True, 'result': output_text.strip()}
+        else:
+            return {'success': False, 'error': data.get('error', {}).get('message', 'No response from Gemini')}
+
+    except Exception as e:
+        print(f"Gemini error: {e}")
+        return {'success': False, 'error': str(e)}
+
 # Home route
-@app.route("/")
+@app.route('/', methods=['GET'])
 def home():
-    return render_template("index.html")
-    
+    return jsonify({
+        'message': 'Fake News Detector API',
+        'version': '1.0',
+        'endpoint': '/predict',
+        'method': 'POST',
+        'example': {
+            'text': 'Your news article text here'
+        }
+    })
 
 # Prediction route
 @app.route('/predict', methods=['POST'])
@@ -66,33 +79,32 @@ def predict():
     try:
         # Get text from request
         data = request.get_json()
-        
+
         if not data or 'text' not in data:
             return jsonify({'error': 'Please provide text in JSON format'}), 400
-        
+
         text = data['text']
 
-        
         if len(text.strip()) == 0:
             return jsonify({'error': 'Text cannot be empty'}), 400
 
-        # Optional Google Search verification
-        google_results = []
+        # Optional Gemini fact-check
         api_key = data.get('googleApiKey', '')
-        
+        gemini_check = None
+
         if api_key:
-            search_query = text[:100]
-            google_results = search_google(search_query, api_key)
+            gemini_check = check_with_gemini(text, api_key)
+
         # Clean the text
         cleaned_text = clean_text(text)
-        
+
         # Vectorize
         text_vectorized = vectorizer.transform([cleaned_text])
-        
+
         # Predict
         prediction = model.predict(text_vectorized)[0]
         confidence = model.predict_proba(text_vectorized)[0]
-        
+
         # Prepare response
         result = {
             'text': text[:100] + '...' if len(text) > 100 else text,
@@ -100,12 +112,11 @@ def predict():
             'confidence': float(max(confidence) * 100),
             'real_probability': float(confidence[1] * 100),
             'fake_probability': float(confidence[0] * 100),
-            'google_results': google_results
+            'gemini_check': gemini_check
         }
-       
-        
+
         return jsonify(result), 200
-    
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -116,13 +127,11 @@ def health():
 
 # Run the app
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
     print("\n" + "="*60)
     print("FAKE NEWS DETECTOR API - STARTING")
     print("="*60)
-    print("API running on: http://localhost:5000")
-    print("Endpoint: POST http://localhost:5000/predict")
+    print(f"API running on port: {port}")
+    print("Endpoint: POST /predict")
     print("="*60 + "\n")
-    app.run(
-    host="0.0.0.0",
-    port=int(os.environ.get("PORT", 5000))
-)
+    app.run(debug=False, host='0.0.0.0', port=port)
