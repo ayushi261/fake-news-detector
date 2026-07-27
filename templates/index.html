@@ -681,9 +681,8 @@
                     Google API Key
                 </label>
                 <input type="text" id="googleApiKey" placeholder="Enter your Google Custom Search API key" style="margin-bottom: 10px;">
-                <input type="text" id="searchEngineId" placeholder="Enter your Search Engine ID (CX)">
                 <p style="font-size: 11px; color: #666; margin-top: 10px;">
-                    Get your free API key at <a href="https://console.cloud.google.com" target="_blank" style="color: #ff0000;">Google Cloud Console</a> and Search Engine ID at <a href="https://programmablesearchengine.google.com" target="_blank" style="color: #ff0000;">Programmable Search Engine</a>. Takes 5 minutes, completely free.
+                    Get your free API key at <a href="https://console.cloud.google.com" target="_blank" style="color: #ff0000;">Google Cloud Console</a>. Takes 2 minutes, completely free.
                 </p>
             </div>
         </details>
@@ -779,9 +778,8 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        text: text,
-                        googleApiKey: document.getElementById('googleApiKey').value,
-                        searchEngineId: document.getElementById('searchEngineId').value
+                    text: text,
+                    googleApiKey: document.getElementById('googleApiKey').value
                     })
                 });
 

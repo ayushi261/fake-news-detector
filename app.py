@@ -5,9 +5,9 @@ import re
 import os
 import requests
 
-
-def search_google(query, api_key, search_engine_id):
-    """Search Google using user's API credentials"""
+DEFAULT_SEARCH_ENGINE_ID = "8505974bd0e0d4ac0"
+def search_google(query, api_key, search_engine_id=None):
+    search_engine_id = search_engine_id or DEFAULT_SEARCH_ENGINE_ID
     try:
         url = "https://www.googleapis.com/customsearch/v1"
         params = {
@@ -79,12 +79,10 @@ def predict():
         # Optional Google Search verification
         google_results = []
         api_key = data.get('googleApiKey', '')
-        search_engine_id = data.get('searchEngineId', '')
         
-        if api_key and search_engine_id:
-            # Extract first 100 characters as search query
+        if api_key:
             search_query = text[:100]
-            google_results = search_google(search_query, api_key, search_engine_id)
+            google_results = search_google(search_query, api_key)
         # Clean the text
         cleaned_text = clean_text(text)
         
