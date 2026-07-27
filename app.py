@@ -31,8 +31,7 @@ def clean_text(text):
 def check_with_gemini(text, api_key):
     """Ask Gemini to fact-check the claim"""
     try:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
         prompt = f"""You are a fact-checking assistant. Evaluate this claim or article excerpt for factual accuracy based on your knowledge:
 
 "{text[:500]}"
