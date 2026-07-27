@@ -3,7 +3,35 @@ from flask_cors import CORS
 import pickle
 import re
 import os
+import requests
 
+
+def search_google(query, api_key, search_engine_id):
+    """Search Google using user's API credentials"""
+    try:
+        url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            'key': api_key,
+            'cx': search_engine_id,
+            'q': query,
+            'num': 3
+        }
+        response = requests.get(url, params=params)
+        data = response.json()
+        
+        if 'items' in data:
+            results = []
+            for item in data['items'][:3]:
+                results.append({
+                    'title': item.get('title', ''),
+                    'link': item.get('link', ''),
+                    'snippet': item.get('snippet', '')
+                })
+            return results
+        return []
+    except Exception as e:
+        print(f"Search error: {e}")
+        return []
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -43,10 +71,20 @@ def predict():
             return jsonify({'error': 'Please provide text in JSON format'}), 400
         
         text = data['text']
+
         
         if len(text.strip()) == 0:
             return jsonify({'error': 'Text cannot be empty'}), 400
+
+        # Optional Google Search verification
+        google_results = []
+        api_key = data.get('googleApiKey', '')
+        search_engine_id = data.get('searchEngineId', '')
         
+        if api_key and search_engine_id:
+            # Extract first 100 characters as search query
+            search_query = text[:100]
+            google_results = search_google(search_query, api_key, search_engine_id)
         # Clean the text
         cleaned_text = clean_text(text)
         
@@ -63,8 +101,10 @@ def predict():
             'prediction': 'REAL' if prediction == 1 else 'FAKE',
             'confidence': float(max(confidence) * 100),
             'real_probability': float(confidence[1] * 100),
-            'fake_probability': float(confidence[0] * 100)
+            'fake_probability': float(confidence[0] * 100),
+            'google_results': google_results
         }
+       
         
         return jsonify(result), 200
     

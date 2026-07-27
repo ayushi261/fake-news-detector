@@ -222,8 +222,7 @@
         .manifesto-image {
             width: 100%;
             height: 450px;
-            background: url("pic.jpg") center center;
-            background-size: cover;
+            background: url("{{ url_for('static', filename='pic.jpg') }}") center center;            background-size: cover;
             background-repeat: no-repeat;
             border: 2px solid #000;
         }
@@ -674,6 +673,16 @@
     </section>
 
     <section class="detector-section" id="detector">
+        <div style="background: #fff3cd; border: 2px solid #ff0000; padding: 20px; margin-bottom: 30px;">
+            <label style="font-size: 12px; font-weight: 900; text-transform: uppercase; display: block; margin-bottom: 10px;">
+                 Google API Key (Optional - for fact verification)
+            </label>
+            <input type="text" id="googleApiKey" placeholder="Enter your Google Custom Search API key" style="margin-bottom: 10px;">
+            <input type="text" id="searchEngineId" placeholder="Enter your Search Engine ID (CX)">
+            <p style="font-size: 11px; color: #666; margin-top: 10px;">
+            Don't have one? <a href="https://console.cloud.google.com" target="_blank" style="color: #ff0000;">Get free API key here</a>. Without it, only AI pattern analysis will run.
+            </p>
+        </div>
         <div class="detector-tabs">
             <div class="tab active" onclick="switchTab('text')">PASTE TEXT</div>
             <div class="tab" onclick="switchTab('url')">PASTE URL</div>
@@ -763,7 +772,11 @@
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: text })
+                    body: JSON.stringify({ 
+                         text: text,
+                        googleApiKey: document.getElementById('googleApiKey').value,
+                        searchEngineId: document.getElementById('searchEngineId').value
+                    })
                 });
 
                 if (!response.ok) throw new Error('API error');
@@ -794,7 +807,20 @@
 
             document.getElementById('realProb').textContent = Math.round(data.real_probability) + '%';
             document.getElementById('fakeProb').textContent = Math.round(data.fake_probability) + '%';
-
+            // Display Google search results if available
+            if (data.google_results && data.google_results.length > 0) {
+                    let googleHTML = '<div style="margin-top: 30px;"><h3 style="font-size: 16px; margin-bottom: 15px;">🔍 Related Search Results:</h3>';
+                    data.google_results.forEach(item => {
+                        googleHTML += `
+                            <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px;">
+                                <a href="${item.link}" target="_blank" style="color: #ff0000; font-weight: 700; text-decoration: none;">${item.title}</a>
+                                <p style="font-size: 13px; color: #666; margin-top: 5px;">${item.snippet}</p>
+                            </div>
+                        `;
+                 });
+                 googleHTML += '</div>';
+                document.getElementById('resultText').innerHTML += googleHTML;
+            }
             result.classList.add('show');
             result.scrollIntoView({ behavior: 'smooth' });
         }
