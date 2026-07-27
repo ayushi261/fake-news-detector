@@ -63,7 +63,7 @@ EXPLANATION: [2-3 sentence explanation of your reasoning]"""
 # Home route - serves the frontend
 @app.route('/', methods=['GET'])
 def home():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory('templates', 'index.html')
 
 # API info route
 @app.route('/api', methods=['GET'])
