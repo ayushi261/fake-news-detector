@@ -1,4 +1,4 @@
-# TruthAI: Fake News Detector - AI-Powered Misinformation Detection
+# VerifyX: Fake News Detector - AI-Powered Misinformation Detection
 
 An intelligent machine learning system that detects fake news with 99% accuracy using natural language processing and classification algorithms.
 
