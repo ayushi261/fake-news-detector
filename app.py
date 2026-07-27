@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pickle
 import re
@@ -8,23 +8,6 @@ import requests
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-from flask import send_from_directory
-
-@app.route('/', methods=['GET'])
-def home():
-    return send_from_directory('.', 'index.html')
-
-@app.route('/api', methods=['GET'])
-def api_info():
-    return jsonify({
-        'message': 'Fake News Detector API',
-        'version': '1.0',
-        'endpoint': '/predict',
-        'method': 'POST',
-        'example': {
-            'text': 'Your news article text here'
-        }
-    })
 
 # Load trained model and vectorizer
 print("Loading model and vectorizer...")
@@ -77,9 +60,14 @@ EXPLANATION: [2-3 sentence explanation of your reasoning]"""
         print(f"Gemini error: {e}")
         return {'success': False, 'error': str(e)}
 
-# Home route
+# Home route - serves the frontend
 @app.route('/', methods=['GET'])
 def home():
+    return send_from_directory('.', 'index.html')
+
+# API info route
+@app.route('/api', methods=['GET'])
+def api_info():
     return jsonify({
         'message': 'Fake News Detector API',
         'version': '1.0',
