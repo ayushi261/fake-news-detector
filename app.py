@@ -8,6 +8,23 @@ import requests
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+from flask import send_from_directory
+
+@app.route('/', methods=['GET'])
+def home():
+    return send_from_directory('.', 'index.html')
+
+@app.route('/api', methods=['GET'])
+def api_info():
+    return jsonify({
+        'message': 'Fake News Detector API',
+        'version': '1.0',
+        'endpoint': '/predict',
+        'method': 'POST',
+        'example': {
+            'text': 'Your news article text here'
+        }
+    })
 
 # Load trained model and vectorizer
 print("Loading model and vectorizer...")
