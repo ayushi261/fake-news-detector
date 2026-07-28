@@ -798,14 +798,20 @@
             const confidence = Math.round(data.confidence);
 
             document.getElementById('resultBadge').className = 'result-badge ' + (isFake ? 'badge-fake' : 'badge-real');
-            document.getElementById('resultBadge').textContent = (isFake ? 'FAKE NEWS' : 'REAL NEWS');
+            document.getElementById('resultBadge').textContent = (isFake ? 'LIKELY FAKE (STYLE-BASED)' : 'LIKELY REAL (STYLE-BASED)');
 
             document.getElementById('confidenceFill').style.width = confidence + '%';
             document.getElementById('confidencePercent').textContent = confidence + '%';
 
-            document.getElementById('resultText').innerHTML = isFake
-                ? 'This article appears to be FAKE NEWS. Be cautious before sharing.'
-                : 'This article appears to be REAL NEWS. Credibility score is high.';
+            let resultHTML = isFake
+                ? `This article's <strong>writing style</strong> matches patterns common in fabricated news (${confidence}% match). This is a style analysis, not a fact verification.`
+                : `This article's <strong>writing style</strong> matches patterns common in legitimate news (${confidence}% match). This is a style analysis, not a fact verification.`;
+
+            if (data.low_reliability_warning) {
+                resultHTML += `<br><br><strong>Note:</strong> Short or ambiguous text is harder for this model to classify reliably. Use the AI fact-check below (if enabled) for factual claims.`;
+            }
+
+            document.getElementById('resultText').innerHTML = resultHTML;
 
             document.getElementById('realProb').textContent = Math.round(data.real_probability) + '%';
             document.getElementById('fakeProb').textContent = Math.round(data.fake_probability) + '%';
@@ -816,15 +822,15 @@
                 if (data.gemini_check.success) {
                     geminiHTML += `<p style="font-size: 14px; line-height: 1.7; white-space: pre-line;">${data.gemini_check.result}</p>`;
                 } else {
-                    geminiHTML += `<p style="font-size: 13px; color: #999;">Could not complete fact-check: ${data.gemini_check.error}</p>`;
+                    geminiHTML += `<p style="font-size: 13px; color: #999;">${data.gemini_check.error}</p>`;
                 }
                 geminiHTML += '</div>';
                 document.getElementById('resultText').innerHTML += geminiHTML;
-            }
+    }
 
             result.classList.add('show');
             result.scrollIntoView({ behavior: 'smooth' });
-        }
+    }
     </script>
 </body>
 </html>
