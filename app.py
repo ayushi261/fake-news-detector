@@ -34,9 +34,7 @@ def clean_text(text):
 def get_wikipedia_context(text):
     """
     Searches Wikipedia for an article related to the claim/article text.
-    Returns a dict indicating whether a match was found and, if so, the
-    matching article title and a short snippet for the user to compare
-    against the claim themselves.
+    ...
     """
     try:
         query = ' '.join(text.split()[:15])  # first ~15 words as the search query
@@ -48,6 +46,9 @@ def get_wikipedia_context(text):
                 'srsearch': query,
                 'format': 'json',
                 'srlimit': 1
+            },
+            headers={
+                'User-Agent': 'VerifyX-FakeNewsDetector/1.0 (https://verifyx-izeg.onrender.com; contact: ayushi1901singh@gmail.com)'
             },
             timeout=10
         )
