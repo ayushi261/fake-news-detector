@@ -483,6 +483,30 @@
             font-weight: 600;
         }
 
+        .wiki-box {
+            margin-top: 30px;
+            border: 2px solid #000;
+            padding: 25px;
+            background: #f5f5f5;
+        }
+
+        .wiki-box h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .wiki-box p {
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .wiki-box a {
+            color: #ff0000;
+            font-weight: 700;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -670,21 +694,6 @@
     </section>
 
     <section class="detector-section" id="detector">
-        <details style="background: #fff3cd; border: 2px solid #ff0000; padding: 15px; margin-bottom: 30px;">
-            <summary style="font-size: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer;">
-                Advanced: Enable AI Fact-Checking (Optional)
-            </summary>
-            <div style="margin-top: 15px;">
-                <label style="font-size: 12px; font-weight: 900; text-transform: uppercase; display: block; margin-bottom: 10px;">
-                    Gemini API Key
-                </label>
-                <input type="text" id="googleApiKey" placeholder="Enter your Gemini API key">
-                <p style="font-size: 11px; color: #666; margin-top: 10px;">
-                    Get your free key at <a href="https://aistudio.google.com/apikey" target="_blank" style="color: #ff0000;">Google AI Studio</a>. Takes 1 minute, completely free.
-                </p>
-            </div>
-        </details>
-
         <div class="detector-tabs">
             <div class="tab active" onclick="switchTab('text')">PASTE TEXT</div>
             <div class="tab" onclick="switchTab('url')">PASTE URL</div>
@@ -723,6 +732,7 @@
                 </div>
             </div>
             <div id="resultText" class="result-text"></div>
+            <div id="wikiBox"></div>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-card-value" id="realProb">0%</div>
@@ -775,10 +785,7 @@
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: text,
-                        googleApiKey: document.getElementById('googleApiKey').value
-                    })
+                    body: JSON.stringify({ text: text })
                 });
 
                 if (!response.ok) throw new Error('API error');
@@ -807,8 +814,8 @@
                 ? `This article's <strong>writing style</strong> matches patterns common in fabricated news (${confidence}% match). This is a style analysis, not a fact verification.`
                 : `This article's <strong>writing style</strong> matches patterns common in legitimate news (${confidence}% match). This is a style analysis, not a fact verification.`;
 
-            if (data.low_reliability_warning) {
-                resultHTML += `<br><br><strong>Note:</strong> Short or ambiguous text is harder for this model to classify reliably. Use the AI fact-check below (if enabled) for factual claims.`;
+            if (data.note) {
+                resultHTML += `<br><br><strong>Note:</strong> ${data.note}`;
             }
 
             document.getElementById('resultText').innerHTML = resultHTML;
@@ -816,21 +823,33 @@
             document.getElementById('realProb').textContent = Math.round(data.real_probability) + '%';
             document.getElementById('fakeProb').textContent = Math.round(data.fake_probability) + '%';
 
-            if (data.gemini_check) {
-                let geminiHTML = '<div style="margin-top: 30px; border: 2px solid #000; padding: 25px; background: #f5f5f5;">';
-                geminiHTML += '<h3 style="font-size: 16px; margin-bottom: 15px; font-weight: 900; text-transform: uppercase;">AI Fact-Check:</h3>';
-                if (data.gemini_check.success) {
-                    geminiHTML += `<p style="font-size: 14px; line-height: 1.7; white-space: pre-line;">${data.gemini_check.result}</p>`;
-                } else {
-                    geminiHTML += `<p style="font-size: 13px; color: #999;">${data.gemini_check.error}</p>`;
-                }
-                geminiHTML += '</div>';
-                document.getElementById('resultText').innerHTML += geminiHTML;
-    }
+            const wikiBox = document.getElementById('wikiBox');
+            const wiki = data.wikipedia_context;
+
+            if (wiki && wiki.found) {
+                const searchUrl = 'https://en.wikipedia.org/wiki/' + encodeURIComponent(wiki.title.replace(/ /g, '_'));
+                wikiBox.innerHTML = `
+                    <div class="wiki-box">
+                        <h3>Related Wikipedia Context</h3>
+                        <p><strong>${wiki.title}</strong></p>
+                        <p>${wiki.snippet}</p>
+                        <p style="margin-top: 10px;"><a href="${searchUrl}" target="_blank">Read the full article →</a></p>
+                    </div>
+                `;
+            } else if (wiki) {
+                wikiBox.innerHTML = `
+                    <div class="wiki-box">
+                        <h3>Related Wikipedia Context</h3>
+                        <p>No matching article found. This may be very recent news or an obscure claim.</p>
+                    </div>
+                `;
+            } else {
+                wikiBox.innerHTML = '';
+            }
 
             result.classList.add('show');
             result.scrollIntoView({ behavior: 'smooth' });
-    }
+        }
     </script>
 </body>
 </html>
