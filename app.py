@@ -68,6 +68,28 @@ def get_wikipedia_context(text):
         print(f"Wikipedia lookup error: {e}")
         return {'found': False, 'error': str(e)}
 
+STOPWORDS = {
+    'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'of', 'in', 'on', 'at',
+    'to', 'for', 'and', 'or', 'but', 'with', 'by', 'from', 'as', 'that', 'this', 'these', 'those',
+    'it', 'its', 'he', 'she', 'his', 'her', 'they', 'their', 'has', 'have', 'had', 'will', 'would',
+    'can', 'could', 'should', 'not'
+}
+
+
+def compute_overlap_ratio(claim_text, snippet_text):
+    """
+    Rough measure of how much of the claim's meaningful words are echoed
+    in the matched Wikipedia snippet/title. Not true fact-checking — just
+    a cheap signal for 'does this article actually seem to be about the claim'.
+    """
+    claim_words = {w for w in re.findall(r'[a-z]+', claim_text.lower())
+                   if w not in STOPWORDS and len(w) > 2}
+    snippet_words = {w for w in re.findall(r'[a-z]+', snippet_text.lower())
+                      if w not in STOPWORDS}
+    if not claim_words:
+        return 0.0
+    overlap = claim_words & snippet_words
+    return len(overlap) / len(claim_words)
 
 # Home route - serves the frontend
 @app.route('/', methods=['GET'])
@@ -117,16 +139,29 @@ def predict():
         # Wikipedia context lookup — always runs, free, no key required
         wiki_context = get_wikipedia_context(text)
 
+        final_prediction = predicted_label
+        final_confidence = confidence_score * 100
+
         if wiki_context.get('found'):
-            note = f"Related Wikipedia article found: \"{wiki_context['title']}\". Compare this against the claim yourself."
+            combined_snippet = wiki_context.get('title', '') + ' ' + wiki_context.get('snippet', '')
+            overlap_ratio = compute_overlap_ratio(text, combined_snippet)
+            wiki_context['overlap_ratio'] = round(overlap_ratio, 2)
+
+            if overlap_ratio >= 0.6:
+                final_prediction = 'REAL'
+                final_confidence = round(overlap_ratio * 100, 2)
+                note = f"Confirmed by Wikipedia: \"{wiki_context['title']}\" strongly supports this claim."
+            else:
+                note = f"Related Wikipedia article found: \"{wiki_context['title']}\", but it only partially overlaps with the claim — verify manually."
         else:
             note = "No matching Wikipedia article found. This may be very recent news or an obscure claim — treat the prediction with extra caution."
 
         # Prepare response
         result = {
             'text': text[:100] + '...' if len(text) > 100 else text,
-            'prediction': predicted_label,
-            'confidence': confidence_score,
+            'ml_prediction': predicted_label,
+            'prediction': final_prediction,
+            'confidence': final_confidence,
             'real_probability': float(confidence[1] * 100),
             'fake_probability': float(confidence[0] * 100),
             'note': note,
