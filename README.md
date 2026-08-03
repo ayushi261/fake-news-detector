@@ -1,6 +1,7 @@
 # VerifyX: Fake News Detector - AI-Powered Misinformation Detection
 
 An intelligent machine learning system that detects fake news with 99% accuracy using natural language processing and classification algorithms.
+Live at :(https://verifyx-izeg.onrender.com/)
 
 ## Features
 
